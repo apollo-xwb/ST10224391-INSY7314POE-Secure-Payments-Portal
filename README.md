@@ -4,6 +4,8 @@ A comprehensive, secure banking application for international money transfers bu
 
 **📋 Note for Lecturer**: All sensitive files (certificates, keys, secrets) are provided as `.example` files. The actual files cannot be pushed to Git for security reasons. Please refer to the setup instructions for configuration details.
 
+YOUTUBE DEMO LINK: https://www.youtube.com/watch?v=LdV8Yq_8XEw
+
 ## 🚀 Features
 
 ### Customer Portal

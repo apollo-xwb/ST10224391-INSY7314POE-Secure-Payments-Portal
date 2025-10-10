@@ -1,6 +1,6 @@
 # 🔒 Secure Customer International Payments Portal
 
-A comprehensive, secure banking application for international money transfers built with React and Node.js, featuring bank-grade security measures and modern web development practices.
+SafePay is a thorough, secure banking application for the purpose of transferring money internationally. SafePay is built with React and Node.js and features bank-grade security measures and web development practices that are modern and accepted in the industry.
 
 **📋 Note for Lecturer**: All sensitive files (certificates, keys, secrets) are provided as `.example` files. The actual files cannot be pushed to Git for security reasons. Please refer to the setup instructions for configuration details.
 

@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged for pre-commit checks
+npx lint-staged
+
+# Run security checks
+npm run security:audit
+npm run security:scan
+

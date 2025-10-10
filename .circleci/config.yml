@@ -1,0 +1,149 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+  sonarcloud: sonarsource/sonarcloud@1.0.3
+  snyk: snyk/snyk@1.0.0
+
+jobs:
+  test:
+    docker:
+      - image: cimg/node:18.17
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Run tests
+          command: npm test
+      - run:
+          name: Run linting
+          command: npm run lint
+      - run:
+          name: Security audit
+          command: npm audit --audit-level=moderate
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: coverage
+
+  security-scan:
+    docker:
+      - image: cimg/node:18.17
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Install security tools
+          command: |
+            npm install -g semgrep
+            npm install -g trufflehog
+            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+            unzip sonar-scanner-cli-4.8.0.2856-linux.zip
+            sudo mv sonar-scanner-4.8.0.2856 /opt/sonar-scanner
+            sudo ln -s /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner
+      - run:
+          name: Run comprehensive security audit
+          command: npm run security:audit
+      - run:
+          name: Run security scan with audit-ci
+          command: npm run security:scan
+      - run:
+          name: Run SAST with Semgrep
+          command: npm run security:sast
+      - run:
+          name: Run dependency vulnerability scan
+          command: npm run security:deps
+      - run:
+          name: Run secrets detection
+          command: npm run security:secrets
+      - run:
+          name: Run custom security tests
+          command: node scripts/security-test.js
+      - run:
+          name: Run SonarQube analysis
+          command: |
+            sonar-scanner \
+              -Dsonar.projectKey=secure-payments-portal \
+              -Dsonar.organization=your-org \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=$SONAR_TOKEN \
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+              -Dsonar.coverage.exclusions=**/*.test.js,**/*.spec.js,**/node_modules/**
+      - store_artifacts:
+          path: semgrep-results.json
+      - store_artifacts:
+          path: snyk-results.json
+      - store_artifacts:
+          path: trufflehog-results.json
+      - store_artifacts:
+          path: security-test-results.json
+
+  build:
+    docker:
+      - image: cimg/node:18.17
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Build application
+          command: |
+            npm run build
+            cd client && npm run build
+      - run:
+          name: Security scan of dependencies
+          command: |
+            npm audit --audit-level=high
+            npx audit-ci --config audit-ci.json
+      - store_artifacts:
+          path: client/dist
+      - store_artifacts:
+          path: logs
+
+  deploy-staging:
+    docker:
+      - image: cimg/node:18.17
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Deploy to staging
+          command: |
+            echo "Deploying to staging environment..."
+            # Add your deployment commands here
+      - run:
+          name: Run security tests
+          command: |
+            # Add security testing commands
+            echo "Running security tests..."
+
+workflows:
+  version: 2
+  test-and-scan:
+    jobs:
+      - test
+      - security-scan:
+          requires:
+            - test
+      - build:
+          requires:
+            - test
+            - security-scan
+      - deploy-staging:
+          requires:
+            - build
+          filters:
+            branches:
+              only: develop
+
+  security-only:
+    jobs:
+      - security-scan:
+          filters:
+            branches:
+              only: main
+
+

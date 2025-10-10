@@ -1,0 +1,23 @@
+# Ignore common false positives
+node_modules/
+.git/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.local
+.env.example
+package-lock.json
+yarn.lock
+
+# Ignore test files
+**/*.test.js
+**/*.spec.js
+__tests__/
+
+# Ignore documentation
+README.md
+*.md
+docs/
+

@@ -1,0 +1,40 @@
+rules:
+  - id: detect-sql-injection
+    patterns:
+      - pattern-either:
+          - pattern: $QUERY = $DB.query($SQL, ...)
+          - pattern: $DB.query($SQL, ...)
+    message: Potential SQL injection vulnerability
+    languages: [javascript]
+    severity: ERROR
+
+  - id: detect-unsafe-eval
+    patterns:
+      - pattern: eval($EXPR)
+      - pattern: new Function($EXPR)
+    message: Use of eval() or Function() constructor can lead to code injection
+    languages: [javascript]
+    severity: ERROR
+
+  - id: detect-hardcoded-secrets
+    patterns:
+      - pattern-regex: "(?i)(password|secret|key|token|api_key)\\s*[:=]\\s*['\"][^'\"]{8,}['\"]"
+    message: Potential hardcoded secret detected
+    languages: [javascript]
+    severity: WARNING
+
+  - id: detect-weak-crypto
+    patterns:
+      - pattern: crypto.createHash("md5")
+      - pattern: crypto.createHash("sha1")
+    message: Weak cryptographic hash function detected
+    languages: [javascript]
+    severity: WARNING
+
+  - id: detect-insecure-random
+    patterns:
+      - pattern: Math.random()
+    message: Math.random() is not cryptographically secure
+    languages: [javascript]
+    severity: WARNING
+

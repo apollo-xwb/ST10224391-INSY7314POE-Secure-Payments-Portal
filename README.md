@@ -6,7 +6,9 @@ SafePay is a thorough, secure banking application for the purpose of transferrin
 
 **📋 Note for Lecturer**: All sensitive files (certificates, keys, secrets) are provided as `.example` files. The actual files cannot be pushed to Git for security reasons. Please refer to the setup instructions for configuration details.
 
-YOUTUBE DEMO LINK: https://www.youtube.com/watch?v=LdV8Yq_8XEw
+PART 3 YOUTUBE DEMO LINK: https://www.youtube.com/watch?v=Y44geUD4CAY
+
+PART 2 YOUTUBE DEMO LINK: https://www.youtube.com/watch?v=LdV8Yq_8XEw
 
 ## 🚀 Features
 

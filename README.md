@@ -1,10 +1,8 @@
 # 🔒 Secure Customer & Employee International Payments Portal
 
-<<<<<<< HEAD
 SafePay is a thorough, secure banking application for the purpose of transferring money internationally. SafePay is built with React and Node.js and features bank-grade security measures and web development practices that are modern and accepted in the industry. The application includes both a Customer Portal for making payments and an Employee Portal for managing payments.
-=======
-SafePay is a thorough, secure banking application for the purpose of transferring money internationally. SafePay is built with React and Node.js and features bank-grade security measures and web development practices that are modern and accepted in the industry.
->>>>>>> 53970a5a665ad71933d733904a9ce87588dad5e4
+
+
 
 **📋 Note for Lecturer**: All sensitive files (certificates, keys, secrets) are provided as `.example` files. The actual files cannot be pushed to Git for security reasons. Please refer to the setup instructions for configuration details.
 

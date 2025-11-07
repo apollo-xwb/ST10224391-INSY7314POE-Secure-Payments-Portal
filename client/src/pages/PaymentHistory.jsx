@@ -28,7 +28,7 @@ const PaymentHistory = () => {
       const response = await api.get(`/payments?${params.toString()}`);
       return response.data.data;
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 15000, // Refetch every 15 seconds for real-time updates
     refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 

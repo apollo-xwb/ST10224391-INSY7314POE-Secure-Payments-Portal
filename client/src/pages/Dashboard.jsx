@@ -26,6 +26,8 @@ const Dashboard = () => {
       const response = await api.get('/payments/stats');
       return response.data.data;
     },
+    refetchInterval: 15000, // Refetch every 15 seconds for real-time updates
+    refetchOnWindowFocus: true,
   });
 
   // Fetch recent payments
@@ -35,6 +37,8 @@ const Dashboard = () => {
       const response = await api.get('/payments?limit=5');
       return response.data.data;
     },
+    refetchInterval: 15000, // Refetch every 15 seconds for real-time updates
+    refetchOnWindowFocus: true,
   });
 
   const getStatusIcon = (status) => {

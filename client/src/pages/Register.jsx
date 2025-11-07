@@ -20,6 +20,7 @@ const Register = () => {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
+      email: '',
       fullName: '',
       idNumber: '',
       accountNumber: '',
@@ -44,6 +45,7 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     const result = await registerUser({
+      email: data.email,
       fullName: data.fullName,
       idNumber: data.idNumber,
       accountNumber: data.accountNumber,
@@ -81,6 +83,32 @@ const Register = () => {
         <div className="card-glass">
           <div className="card-content">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="label">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  className={cn('input', errors.email && 'input-error')}
+                  placeholder="you@example.com"
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: 'Please enter a valid email address',
+                    },
+                  })}
+                />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-error-600">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
               {/* Full Name Field */}
               <div>
                 <label htmlFor="fullName" className="label">
@@ -129,16 +157,16 @@ const Register = () => {
                   {...register('idNumber', {
                     required: 'ID number is required',
                     minLength: {
-                      value: 5,
-                      message: 'ID number must be at least 5 characters',
+                      value: 13,
+                      message: 'ID number must be exactly 13 digits',
                     },
                     maxLength: {
-                      value: 20,
-                      message: 'ID number must not exceed 20 characters',
+                      value: 13,
+                      message: 'ID number must be exactly 13 digits',
                     },
                     pattern: {
-                      value: /^[a-zA-Z0-9]+$/,
-                      message: 'ID number can only contain letters and numbers',
+                      value: /^[0-9]+$/,
+                      message: 'ID number can only contain digits',
                     },
                   })}
                 />
@@ -163,12 +191,12 @@ const Register = () => {
                   {...register('accountNumber', {
                     required: 'Account number is required',
                     minLength: {
-                      value: 8,
-                      message: 'Account number must be at least 8 characters',
+                      value: 10,
+                      message: 'Account number must be 10-12 digits',
                     },
                     maxLength: {
-                      value: 20,
-                      message: 'Account number must not exceed 20 characters',
+                      value: 12,
+                      message: 'Account number must be 10-12 digits',
                     },
                     pattern: {
                       value: /^[0-9]+$/,

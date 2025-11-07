@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -19,6 +20,13 @@ import PaymentHistory from './pages/PaymentHistory';
 import PaymentDetails from './pages/PaymentDetails';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
+
+// Employee Pages
+import EmployeeLogin from './pages/EmployeeLogin';
+import EmployeeDashboard from './pages/EmployeeDashboard';
+import EmployeePayments from './pages/EmployeePayments';
+import EmployeePaymentDetails from './pages/EmployeePaymentDetails';
+import EmployeeCustomers from './pages/EmployeeCustomers';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -37,12 +45,20 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <Router>
+            <NotificationProvider>
+              <Router>
               <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                
+                {/* Employee routes */}
+                <Route path="/employee/login" element={<EmployeeLogin />} />
+                <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
+                <Route path="/employee/payments" element={<EmployeePayments />} />
+                <Route path="/employee/payments/:id" element={<EmployeePaymentDetails />} />
+                <Route path="/employee/customers" element={<EmployeeCustomers />} />
                 
                 {/* Protected routes */}
                 <Route path="/" element={
@@ -89,6 +105,7 @@ function App() {
               />
               </div>
             </Router>
+          </NotificationProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>

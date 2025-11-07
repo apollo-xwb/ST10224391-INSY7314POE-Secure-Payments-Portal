@@ -79,16 +79,16 @@ const Login = () => {
                   {...register('idNumber', {
                     required: 'ID number is required',
                     minLength: {
-                      value: 5,
-                      message: 'ID number must be at least 5 characters',
+                      value: 13,
+                      message: 'ID number must be exactly 13 digits',
                     },
                     maxLength: {
-                      value: 20,
-                      message: 'ID number must not exceed 20 characters',
+                      value: 13,
+                      message: 'ID number must be exactly 13 digits',
                     },
                     pattern: {
-                      value: /^[a-zA-Z0-9]+$/,
-                      message: 'ID number can only contain letters and numbers',
+                      value: /^[0-9]+$/,
+                      message: 'ID number can only contain digits',
                     },
                   })}
                 />

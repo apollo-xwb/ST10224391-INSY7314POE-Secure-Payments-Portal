@@ -10,6 +10,8 @@
     "build": "cd client && npm run build",
     "start": "node server.js",
     "test": "jest",
+    "test:employee": "jest __tests__/employee-portal.test.js",
+    "test:all": "jest --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

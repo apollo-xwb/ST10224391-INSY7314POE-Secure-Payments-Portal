@@ -1,9 +1,10 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { LogOut, User, Bell, Sun, Moon } from 'lucide-react';
+import { LogOut, User, Sun, Moon } from 'lucide-react';
 import { cn } from '../utils/cn';
 import SafePayLogo from '../assets/SafePay.png';
+import NotificationDropdown from './NotificationDropdown';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -39,10 +40,7 @@ const Header = () => {
             </button>
 
             {/* Notifications */}
-            <button className="relative p-3 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-              <Bell className="w-6 h-6" />
-              <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationDropdown />
             
             {/* User menu */}
             <div className="flex items-center space-x-3">

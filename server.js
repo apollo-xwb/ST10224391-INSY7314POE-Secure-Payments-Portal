@@ -1,28 +1,5 @@
-/**
- * SECURE PAYMENTS PORTAL - MAIN SERVER FILE
- * 
- * This server implements enterprise-grade security measures following industry standards
- * and best practices for financial applications (Stallings & Brown, 2018; OWASP Foundation, 2021).
- * 
- * Security technologies implemented:
- * - Express.js: Web application framework (Express.js Documentation, 2024)
- * - Helmet.js: Security headers middleware (Helmet.js Documentation, 2024)
- * - Argon2id: Password hashing algorithm (Argon2 Documentation, 2024)
- * - MongoDB Atlas: Cloud database with encryption (MongoDB Atlas Documentation, 2024)
- * - HTTPS/TLS: Secure communication protocol (RFC 8446, 2018)
- * - JWT: JSON Web Tokens for authentication (Auth0, 2024)
- * 
- * References:
- * - Stallings, W. & Brown, L. (2018). Computer Security: Principles and Practice (4th ed.). Pearson.
- * - OWASP Foundation. (2021). OWASP Top 10 - 2021: The Ten Most Critical Web Application Security Risks.
- * - Express.js Documentation. (2024). Express - Fast, unopinionated, minimalist web framework for Node.js.
- * - Helmet.js Documentation. (2024). Helmet - Secure Express.js apps by setting various HTTP headers.
- * - Argon2 Documentation. (2024). Argon2 - The password hashing function that won the Password Hashing Competition.
- * - MongoDB Atlas Documentation. (2024). MongoDB Atlas - Multi-cloud database service.
- * - RFC 8446. (2018). The Transport Layer Security (TLS) Protocol Version 1.3.
- * - Auth0. (2024). JSON Web Token (JWT) - Introduction to JWT.
- * - Anthropic. (2024). Claude AI Assistant - Server security implementation guidance.
- */
+// Main server file for the Secure Payments Portal
+// See REFERENCES.md for technology references and citations
 
 const express = require('express');
 const https = require('https');
@@ -42,6 +19,9 @@ require('dotenv').config();
 const { connectDB } = require('./models');
 const authRoutes = require('./routes/auth');
 const paymentRoutes = require('./routes/payments');
+const employeeAuthRoutes = require('./routes/employee-auth');
+const employeePaymentRoutes = require('./routes/employee-payments');
+const notificationRoutes = require('./routes/notifications');
 const healthRoutes = require('./routes/health');
 const { errorHandler } = require('./middleware/errorHandler');
 const { securityHeaders, sanitizeInput } = require('./middleware/security');
@@ -105,8 +85,8 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    // Skip rate limiting for health checks
-    return req.path === '/health';
+    // Skip rate limiting for health checks and OPTIONS requests (CORS preflight)
+    return req.path === '/health' || req.method === 'OPTIONS';
   }
 });
 
@@ -120,27 +100,92 @@ const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true // Don't count successful requests
+  skipSuccessfulRequests: true, // Don't count successful requests
+  skip: (req) => {
+    // Skip OPTIONS requests (CORS preflight)
+    return req.method === 'OPTIONS';
+  }
 });
 
 const speedLimiter = slowDown({
   windowMs: 15 * 60 * 1000, // 15 minutes
   delayAfter: 50, // allow 50 requests per 15 minutes, then...
-  delayMs: () => 500 // begin adding 500ms of delay per request above 50
+  delayMs: () => 500, // begin adding 500ms of delay per request above 50
+  skip: (req) => {
+    // Skip OPTIONS requests (CORS preflight)
+    return req.method === 'OPTIONS';
+  }
 });
 
+// CORS Configuration - MUST BE BEFORE RATE LIMITING
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (process.env.NODE_ENV === 'production') {
+      // Production: Only allow specific domains
+      const allowedOrigins = ['https://yourdomain.com'];
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // Development: Allow all localhost origins (both http and https)
+      const allowedPatterns = [
+        /^https?:\/\/localhost(:\d+)?$/,
+        /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+        /^https?:\/\/localhost:5173$/,
+        /^https?:\/\/localhost:5174$/
+      ];
+      
+      const isAllowed = allowedPatterns.some(pattern => pattern.test(origin));
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        // In development, allow all origins for flexibility
+        callback(null, true);
+      }
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
+
+// Explicit OPTIONS handler as fallback for CORS preflight
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  
+  // In development, allow all localhost origins
+  if (process.env.NODE_ENV !== 'production') {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.status(204).send();
+  } else {
+    // In production, check allowed origins
+    const allowedOrigins = ['https://yourdomain.com'];
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.status(204).send();
+    } else {
+      res.status(403).send('Not allowed by CORS');
+    }
+  }
+});
+
+// Apply rate limiting AFTER CORS
 app.use(limiter);
 app.use(speedLimiter);
-
-// CORS Configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
-    : ['http://localhost:5173', 'https://localhost:5173', 'http://localhost:3000', 'https://localhost:3000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
 
 // Body parsing and compression
 app.use(compression());
@@ -204,6 +249,9 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/employee/auth', authLimiter, employeeAuthRoutes);
+app.use('/api/employee', employeePaymentRoutes);
 app.use('/api/health', healthRoutes);
 
 // Serve static files in production

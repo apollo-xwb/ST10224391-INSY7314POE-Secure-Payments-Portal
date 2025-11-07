@@ -435,54 +435,53 @@ For support and questions:
 
 **For detailed grading assessment, see `EMPLOYEE_PORTAL_GRADING_REPORT.md`**
 
-#### Password Security [20 Marks]
+#### Password Security
 - ✅ **Meets Standard**: Argon2id implementation with secure parameters for both portals
 - ✅ **Exceeds Standard**: Industry-leading password hashing with advanced security features
-- **Score**: 18-20/20
 
-#### DevSecOps Pipeline [30 Marks]
+
+#### DevSecOps Pipeline
 - ✅ **Meets Standard**: CircleCI pipeline with SAST, SCA, and API testing
 - ✅ **Exceeds Standard**: SonarCloud integration, secrets detection, custom security tests
-- **Score**: 28-30/30
 
-#### Static Login [10 Marks]
+
+#### Static Login
 - ✅ **Meets Standard**: Preconfigured employee accounts, no registration process
 - ✅ **Exceeds Standard**: Secure account creation, comprehensive account management
-- **Score**: 9-10/10
 
-#### Overall Functioning [20 Marks]
+
+#### Overall Functioning
 - ✅ **Meets Standard**: Correctly configured and secured, data flows between portals
 - ✅ **Exceeds Standard**: Real-time updates, comprehensive attack protection, excellent UX
-- **Score**: 18-20/20
 
-**Total Estimated Score: 73-80/80 Marks**
+
 
 ### General POE Requirements (Previous Tasks)
 
 #### Password Security (10 Marks)
 - ✅ **Meets Standard**: Argon2id implementation with secure parameters
 - ✅ **Exceeds Standard**: Industry-leading password hashing
-- **Score**: 8-10/10
 
-#### Input Whitelisting (10 Marks)
+
+#### Input Whitelisting
 - ✅ **Meets Standard**: Comprehensive RegEx patterns for all inputs
 - ✅ **Exceeds Standard**: Advanced sanitization and validation
-- **Score**: 8-10/10
 
-#### Securing Data in Transit with SSL (20 Marks)
+
+#### Securing Data in Transit with SSL
 - ✅ **Meets Standard**: Valid certificates and HTTPS enforcement
 - ✅ **Exceeds Standard**: Certificate pinning, HSTS, production-ready
-- **Score**: 15-20/20
 
-#### Protecting against attacks (30 Marks)
+
+#### Protecting against attacks
 - ✅ **Meets Standard**: Express-rate-limit, Helmet, comprehensive protection
 - ✅ **Exceeds Standard**: Multi-layer security with advanced prevention
-- **Score**: 25-30/30
 
-#### DevSecOps pipeline (10 Marks)
+
+#### DevSecOps pipeline
 - ✅ **Meets Standard**: Basic pipeline with security scanning
 - ✅ **Exceeds Standard**: Advanced automation with git hooks and CI/CD
-- **Score**: 8-10/10
+
 
 ## 📚 Technology References
 

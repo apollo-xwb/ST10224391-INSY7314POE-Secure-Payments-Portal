@@ -1,36 +1,9 @@
-/**
- * SECURITY-ENHANCED AUTHENTICATION MIDDLEWARE
- * 
- * This middleware implements comprehensive authentication and session security following
- * industry standards and security best practices (Stallings & Brown, 2018; OWASP Foundation, 2021).
- * 
- * Security measures implemented:
- * 1. JWT Token Management: Secure token generation and verification (Auth0, 2024)
- * 2. Session Security: IP binding, user agent validation, concurrent limits (OWASP Foundation, 2021)
- * 3. Account Lockout: Brute force protection with progressive delays (Stallings & Brown, 2018)
- * 4. Session Hijacking Prevention: Multiple validation layers (Anthropic, 2024)
- * 5. Audit Logging: Security event tracking and monitoring (NIST, 2020)
- * 
- * References:
- * - Stallings, W. & Brown, L. (2018). Computer Security: Principles and Practice (4th ed.). Pearson.
- * - OWASP Foundation. (2021). OWASP Top 10 - 2021: The Ten Most Critical Web Application Security Risks.
- * - Auth0. (2024). JSON Web Token (JWT) - Introduction to JWT.
- * - NIST. (2020). NIST Special Publication 800-53: Security and Privacy Controls for Federal Information Systems.
- * - Anthropic. (2024). Claude AI Assistant - Authentication security implementation guidance.
- */
-
+// Anthropic. (2024). Claude AI Assistant - Authentication security implementation guidance.
+// Authentication middleware - JWT tokens and session management
 const jwt = require('jsonwebtoken');
 const { User, Session } = require('../models');
 
-/**
- * SECURITY: JWT Token Generation
- * 
- * Generates secure JWT tokens with:
- * - Short-lived access tokens (15 minutes)
- * - Long-lived refresh tokens (7 days)
- * - Proper issuer and audience claims
- * - Minimal payload to reduce attack surface
- */
+// Generate JWT tokens for user authentication
 const generateTokens = (user) => {
   // SECURITY: Minimal payload to reduce token size and attack surface
   const payload = {
@@ -95,7 +68,7 @@ const verifyToken = async (req, res, next) => {
     // Check if session is still valid
     const session = await Session.findOne({
       user_id: user._id,
-      is_active: true,
+        is_active: true,
       expires_at: { $gt: new Date() }
     });
 
@@ -146,7 +119,7 @@ const validateSession = async (req, res, next) => {
     // Verify session exists and is valid
     const session = await Session.findOne({
       _id: sessionId,
-      is_active: true,
+        is_active: true,
       expires_at: { $gt: new Date() }
     }).populate('user_id', '-password_hash');
 
@@ -221,9 +194,9 @@ const refreshToken = async (req, res, next) => {
 
     // Find active session with this refresh token
     const session = await Session.findOne({
-      user_id: decoded.id,
-      refresh_token: refreshToken,
-      is_active: true,
+        user_id: decoded.id,
+        refresh_token: refreshToken,
+        is_active: true,
       refresh_expires_at: { $gt: new Date() }
     }).populate('user_id', '-password_hash');
 

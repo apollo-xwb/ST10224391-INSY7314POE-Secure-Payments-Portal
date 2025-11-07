@@ -4,17 +4,17 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
 const session = require('express-session');
-const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const morgan = require('morgan');
 
 // Import models and database
-const { sequelize, User, Session } = require('../models');
+const { connectDB, User, Session } = require('../models');
 
 // Import middleware
 const { errorHandler } = require('../middleware/errorHandler');
-const { securityLogger } = require('../middleware/security');
+const { securityHeaders, sanitizeInput } = require('../middleware/security');
 
 // Import routes
 const authRoutes = require('../routes/auth');
@@ -62,6 +62,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
+// Security headers and input sanitization
+app.use(securityHeaders);
+app.use(sanitizeInput);
+
 // Rate limiting - completely disabled for tests
 if (process.env.NODE_ENV !== 'test') {
   const limiter = rateLimit({
@@ -94,14 +98,15 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(speedLimiter);
 }
 
-// Session configuration
+// Session configuration - using MongoDB store
 app.use(session({
   secret: process.env.SESSION_SECRET || 'test-session-secret',
   resave: false,
   saveUninitialized: false,
-  store: new SequelizeStore({
-    db: sequelize,
-    tableName: 'Sessions'
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI_TEST || process.env.MONGODB_URI,
+    touchAfter: 24 * 3600, // lazy session update
+    ttl: 24 * 60 * 60 // 24 hours
   }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
@@ -110,9 +115,6 @@ app.use(session({
     sameSite: 'strict'
   }
 }));
-
-// Security logging
-app.use(securityLogger);
 
 // Routes - no rate limiting for tests
 app.use('/api/auth', authRoutes);

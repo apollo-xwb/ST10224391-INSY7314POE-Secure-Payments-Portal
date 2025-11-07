@@ -1,28 +1,5 @@
-/**
- * SECURITY-ENHANCED PAYMENT MODEL
- * 
- * This model implements comprehensive security measures for international payment
- * processing, following PCI DSS standards and banking security requirements
- * (PCI Security Standards Council, 2023; SWIFT, 2024; ISO 13616, 2020).
- * 
- * SECURITY FEATURES IMPLEMENTED:
- * 1. Input Validation: RegEx patterns prevent injection attacks (OWASP Foundation, 2021)
- * 2. Data Sanitization: Automatic trimming and case normalization (Anthropic, 2024)
- * 3. Financial Data Protection: Sensitive fields excluded from JSON (PCI Security Standards Council, 2023)
- * 4. SWIFT/IBAN Validation: International banking standards compliance (SWIFT, 2024; ISO 13616, 2020)
- * 5. Amount Validation: Prevents financial fraud and overflow attacks (Stallings & Brown, 2018)
- * 6. Audit Trail: Complete payment tracking and compliance logging (NIST, 2020)
- * 
- * References:
- * - PCI Security Standards Council. (2023). Payment Card Industry (PCI) Data Security Standard.
- * - SWIFT. (2024). SWIFT Code Standards and Validation Rules.
- * - ISO 13616. (2020). International Bank Account Number (IBAN) - Part 1: Structure of the IBAN.
- * - OWASP Foundation. (2021). OWASP Top 10 - 2021: The Ten Most Critical Web Application Security Risks.
- * - Stallings, W. & Brown, L. (2018). Computer Security: Principles and Practice (4th ed.). Pearson.
- * - NIST. (2020). NIST Special Publication 800-53: Security and Privacy Controls for Federal Information Systems.
- * - Anthropic. (2024). Claude AI Assistant - Payment model security implementation guidance.
- */
-
+// Anthropic. (2024). Claude AI Assistant - Payment model security implementation guidance
+// Payment model with security features
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
@@ -265,6 +242,7 @@ const paymentSchema = new Schema({
   
   // SECURITY: Remove sensitive internal data from JSON serialization
   toJSON: {
+    virtuals: true,                    // Include virtual fields (like payment_reference)
     transform: function(doc, ret) {
       // Remove sensitive internal data to prevent data leakage
       delete ret.employee_notes;        // Never expose internal notes
@@ -285,9 +263,13 @@ paymentSchema.index({ amount: 1 });                                   // Optimiz
 paymentSchema.index({ currency: 1 });                                 // Optimize currency-based queries
 paymentSchema.index({ swift_code: 1 });                               // Optimize SWIFT code queries
 
-/**
- * SECURITY METHODS - Payment validation and business logic
- */
+// VIRTUAL FIELD - Alias for frontend compatibility
+// Maps payment_reference to transaction_reference for consistency
+paymentSchema.virtual('payment_reference').get(function() {
+  return this.transaction_reference;
+});
+
+// Payment validation and business logic methods
 
 // Calculate total amount including processing fees
 paymentSchema.methods.calculateTotalAmount = function() {
@@ -307,9 +289,7 @@ paymentSchema.methods.canBeCancelled = function() {
   return ['pending', 'approved'].includes(this.status);
 };
 
-/**
- * SECURITY MIDDLEWARE - Data sanitization and validation
- */
+// Data sanitization and validation middleware
 paymentSchema.pre('save', function(next) {
   // SECURITY: Generate unique transaction reference if not provided
   if (!this.transaction_reference) {

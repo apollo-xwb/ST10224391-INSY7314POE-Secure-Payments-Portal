@@ -1,30 +1,7 @@
-/**
- * SECURITY MIDDLEWARE - Comprehensive Security Headers and Input Sanitization
- * 
- * This middleware implements multiple layers of security protection following OWASP guidelines
- * and industry best practices for web application security (OWASP Foundation, 2021).
- * 
- * Security measures implemented:
- * 1. Security Headers: Prevents clickjacking, XSS, MIME sniffing (Helmet.js Documentation, 2024)
- * 2. Input Sanitization: Removes malicious content and control characters (OWASP Foundation, 2021)
- * 3. Rate Limiting: Prevents DDoS and brute force attacks (Express Rate Limit, 2024)
- * 4. Request Validation: Ensures proper request structure (Anthropic, 2024)
- * 
- * References:
- * - OWASP Foundation. (2021). OWASP Top 10 - 2021: The Ten Most Critical Web Application Security Risks.
- * - Helmet.js Documentation. (2024). Helmet - Secure Express.js apps by setting various HTTP headers.
- * - Express Rate Limit. (2024). Basic rate-limiting middleware for Express.
- * - Anthropic. (2024). Claude AI Assistant - Security implementation guidance.
- */
-
+// Security middleware - headers and input sanitization
 const rateLimit = require('express-rate-limit');
 
-/**
- * SECURITY HEADERS MIDDLEWARE
- * 
- * Implements comprehensive security headers following OWASP guidelines
- * to protect against various web-based attacks.
- */
+// Security headers middleware
 const securityHeaders = (req, res, next) => {
   // SECURITY: Prevent clickjacking attacks
   // X-Frame-Options: DENY prevents the page from being embedded in frames
@@ -53,29 +30,9 @@ const securityHeaders = (req, res, next) => {
   next();
 };
 
-/**
- * INPUT SANITIZATION MIDDLEWARE
- * 
- * Implements comprehensive input sanitization to prevent:
- * 1. XSS attacks through malicious script injection
- * 2. Control character injection attacks
- * 3. JavaScript protocol injection
- * 4. Event handler injection
- */
+// Input sanitization middleware - prevents XSS and injection attacks
 const sanitizeInput = (req, res, next) => {
-  /**
-   * SECURITY: Sanitize string inputs to prevent XSS and injection attacks
-   * 
-   * This function removes:
-   * - Script tags and their content (<script>...</script>)
-   * - Script tag attributes (<script src="...">)
-   * - Null bytes and control characters (0x00-0x1F, 0x7F)
-   * - JavaScript protocol handlers (javascript:)
-   * - Event handler attributes (onclick=, onload=, etc.)
-   * - Dangerous HTML tags (iframe, object, embed, form, input, etc.)
-   * - HTML entities used for XSS (&lt;script&gt;)
-   * - Leading/trailing whitespace
-   */
+  // Sanitize string inputs to prevent XSS and injection attacks
   const sanitizeString = (str) => {
     if (typeof str !== 'string') return str;
     
@@ -131,13 +88,23 @@ const sanitizeInput = (req, res, next) => {
       return obj.map(sanitizeObject);
     }
     
-    if (typeof obj === 'object') {
-      const sanitized = {};
-      for (const [key, value] of Object.entries(obj)) {
+  if (typeof obj === 'object') {
+    const sanitized = {};
+    for (const [key, value] of Object.entries(obj)) {
+      // SECURITY: Skip sanitization for password fields to preserve exact password values
+      // Passwords are hashed and validated separately, so sanitization could cause mismatches
+      if (key.toLowerCase().includes('password')) {
+        // Preserve password exactly as-is, no modification whatsoever
+        sanitized[key] = value;
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[Sanitization] Skipping password field "${key}", preserving value (length: ${value?.length || 0})`);
+        }
+      } else {
         sanitized[key] = sanitizeObject(value);
       }
-      return sanitized;
     }
+    return sanitized;
+  }
     
     return obj;
   };

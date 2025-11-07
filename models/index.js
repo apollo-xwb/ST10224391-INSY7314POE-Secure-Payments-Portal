@@ -77,6 +77,7 @@ process.on('SIGTERM', async () => {
 const User = require('./User');
 const Payment = require('./Payment');
 const Session = require('./Session');
+const Employee = require('./Employee');
 
 // Export models and connection function
 module.exports = {
@@ -84,5 +85,6 @@ module.exports = {
   mongoose,
   User,
   Payment,
-  Session
+  Session,
+  Employee
 };

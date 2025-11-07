@@ -1,33 +1,34 @@
 const request = require('supertest');
 const app = require('./app');
-const { User, Session, sequelize } = require('../models');
+const { User, Session, connectDB, mongoose } = require('../models');
 
 describe('Authentication System', () => {
   beforeAll(async () => {
-    // Sync database for tests
-    await sequelize.sync({ force: true });
+    // Connect to MongoDB for tests
+    await connectDB();
   });
 
   beforeEach(async () => {
     // Clean up database before each test
-    await Session.destroy({ where: {} });
-    await User.destroy({ where: {} });
+    await Session.deleteMany({});
+    await User.deleteMany({});
   });
 
   afterAll(async () => {
     // Clean up after all tests
-    await Session.destroy({ where: {} });
-    await User.destroy({ where: {} });
-    await sequelize.close();
+    await Session.deleteMany({});
+    await User.deleteMany({});
+    await mongoose.connection.close();
   });
 
   describe('POST /api/auth/register', () => {
     it('should register a new user successfully', async () => {
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -39,8 +40,8 @@ describe('Authentication System', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.user.full_name).toBe('John Doe');
-      expect(response.body.data.user.id_number).toBe(`TEST${timestamp}`);
-      expect(response.body.data.user.account_number).toBe(`${timestamp}`);
+      expect(response.body.data.user.id_number).toBe(userData.idNumber);
+      expect(response.body.data.user.account_number).toBe(userData.accountNumber);
       expect(response.body.data.user.password_hash).toBeUndefined();
       expect(response.body.data.tokens.accessToken).toBeDefined();
       expect(response.body.data.tokens.refreshToken).toBeDefined();
@@ -48,10 +49,12 @@ describe('Authentication System', () => {
 
     it('should reject registration with duplicate ID number', async () => {
       const timestamp = Date.now();
+      const idNumber = timestamp.toString().slice(-13).padStart(13, '0');
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: idNumber,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -64,9 +67,10 @@ describe('Authentication System', () => {
 
       // Try to register second user with same ID number
       const duplicateUserData = {
+        email: `test${timestamp + 1}@example.com`,
         fullName: 'Jane Doe',
         idNumber: userData.idNumber, // Use the same ID number
-        accountNumber: `${timestamp + 1}`,
+        accountNumber: `${(timestamp + 1).toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -82,10 +86,12 @@ describe('Authentication System', () => {
 
     it('should reject registration with duplicate account number', async () => {
       const timestamp = Date.now();
+      const accountNumber = timestamp.toString().slice(-12).padStart(10, '0');
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: accountNumber,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -98,8 +104,9 @@ describe('Authentication System', () => {
 
       // Try to register second user with same account number
       const duplicateUserData = {
+        email: `test${timestamp + 1}@example.com`,
         fullName: 'Jane Doe',
-        idNumber: `TEST${timestamp + 1}`,
+        idNumber: `${(timestamp + 1).toString().slice(-13).padStart(13, '0')}`,
         accountNumber: userData.accountNumber, // Use the same account number
         password: 'Password123!',
         confirmPassword: 'Password123!'
@@ -117,9 +124,10 @@ describe('Authentication System', () => {
     it('should reject registration with invalid password', async () => {
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'weak',
         confirmPassword: 'weak'
       };
@@ -136,9 +144,10 @@ describe('Authentication System', () => {
     it('should reject registration with mismatched passwords', async () => {
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'DifferentPassword123!'
       };
@@ -155,9 +164,10 @@ describe('Authentication System', () => {
     it('should reject registration with invalid full name', async () => {
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John123',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -174,9 +184,10 @@ describe('Authentication System', () => {
     it('should reject registration with invalid ID number', async () => {
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
         idNumber: '123',
-        accountNumber: `${timestamp}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -198,9 +209,10 @@ describe('Authentication System', () => {
       // Create a test user with unique data
       const timestamp = Date.now();
       testUserData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -241,12 +253,13 @@ describe('Authentication System', () => {
         .expect(401);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message).toContain('Invalid ID number or password');
+      const errorMessage = response.body.error?.message || '';
+      expect(errorMessage).toContain('Invalid ID number or password');
     });
 
     it('should reject login with non-existent user', async () => {
       const loginData = {
-        idNumber: 'NONEXISTENT',
+        idNumber: '1234567890123', // Valid format but non-existent
         password: 'Password123!'
       };
 
@@ -256,12 +269,13 @@ describe('Authentication System', () => {
         .expect(401);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message).toContain('No account found');
+      const errorMessage = response.body.error?.message || '';
+      expect(errorMessage).toContain('No account found');
     });
 
     it('should reject login with invalid ID number format', async () => {
       const loginData = {
-        idNumber: '123',
+        idNumber: '123', // Must be exactly 13 digits
         password: 'Password123!'
       };
 
@@ -271,7 +285,8 @@ describe('Authentication System', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.error.message).toContain('ID number');
+      const errorMessage = response.body.error?.message || '';
+      expect(errorMessage).toContain('ID number');
     });
   });
 
@@ -283,9 +298,10 @@ describe('Authentication System', () => {
       // Create a test user and get token
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -335,8 +351,9 @@ describe('Authentication System', () => {
         .get('/api/auth/me')
         .expect(401);
 
-      expect(response.body.error).toBeDefined();
-      expect(response.body.message).toContain('No token provided');
+      expect(response.body.error || response.body.message).toBeDefined();
+      const errorMessage = response.body.error?.message || response.body.message || '';
+      expect(errorMessage).toContain('No token provided');
     });
 
     it('should reject request with invalid token', async () => {
@@ -345,8 +362,9 @@ describe('Authentication System', () => {
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
 
-      expect(response.body.error).toBeDefined();
-      expect(response.body.message).toContain('Token is malformed or invalid');
+      expect(response.body.error || response.body.message).toBeDefined();
+      const errorMessage = response.body.error?.message || response.body.message || '';
+      expect(errorMessage).toContain('Token is malformed or invalid');
     });
   });
 
@@ -357,9 +375,10 @@ describe('Authentication System', () => {
       // Create a test user and get refresh token
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };
@@ -426,9 +445,10 @@ describe('Authentication System', () => {
       // Create a test user and get tokens
       const timestamp = Date.now();
       const userData = {
+        email: `test${timestamp}@example.com`,
         fullName: 'John Doe',
-        idNumber: `TEST${timestamp}`,
-        accountNumber: `${timestamp}`,
+        idNumber: `${timestamp.toString().slice(-13).padStart(13, '0')}`,
+        accountNumber: `${timestamp.toString().slice(-12).padStart(10, '0')}`,
         password: 'Password123!',
         confirmPassword: 'Password123!'
       };

@@ -69,7 +69,7 @@ const passwordHash = await argon2.hash(password, {
 
 ---
 
-## 2. DevSecOps Pipeline [30 Marks]
+## 2. DevSecOps Pipeline
 
 
 ### Evidence and Justification:
@@ -294,7 +294,6 @@ const employee = await Employee.createEmployee(empData);
 
 ### Evidence and Justification:
 
-#### ✅ **Meets Standard (10-14 Marks)**
 - **Correct Configuration**: Application is correctly configured and secured
 - **Data Flow**: Information processed on customer portal appears correctly in employee portal
 - **Full Functionality**: All features work as expected

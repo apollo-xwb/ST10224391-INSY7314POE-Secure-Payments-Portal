@@ -103,14 +103,6 @@ This document outlines the security measures implemented in the Secure Payments 
 - Unusual access patterns
 - Security scan failures
 
-## Reporting Security Issues
-
-If you discover a security vulnerability, please report it responsibly:
-
-1. **Email**: security@yourcompany.com
-2. **Response Time**: Within 24 hours
-3. **Disclosure**: Coordinated disclosure after fix
-
 ## Security Best Practices
 
 ### For Developers
@@ -140,10 +132,3 @@ Security updates are applied:
 - **High**: Within 72 hours
 - **Medium**: Within 1 week
 - **Low**: Within 1 month
-
-## Contact
-
-For security-related questions or concerns:
-- **Email**: security@yourcompany.com
-- **Phone**: +1-XXX-XXX-XXXX
-- **Emergency**: security-emergency@yourcompany.com
